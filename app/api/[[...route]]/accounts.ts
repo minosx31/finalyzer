@@ -3,7 +3,6 @@ import { accounts } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
 
 const app = new Hono()
     .get("/",
@@ -12,10 +11,7 @@ const app = new Hono()
             const auth = getAuth(c);
 
             if (!auth?.userId) {
-                // Use throw instead of return because if not in our AppType, it will have 2 outputs instead of 1
-                throw new HTTPException(401, {
-                    res: c.json({ error: "Unauthorized" }, 401),
-                });
+                return c.json({ error: "Unauthorized" }, 401);
             }
 
             const data = await db
