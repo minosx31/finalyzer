@@ -36,7 +36,7 @@ const Navigation = () => {
 
     const router = useRouter();
     const pathname = usePathname();
-    const isMobile = useMedia("(max-width: 1024px)", false);
+    const isMobile = useMedia("(max-width: 768px)", false);
 
     const onClick = (href: string) => {
         router.push(href);
@@ -74,7 +74,7 @@ const Navigation = () => {
     }
 
     return (
-        <nav className="hidden lg:flex items-center gap-x-2 overflow-x-auto">
+        <nav className="hidden md:flex items-center gap-x-2 overflow-x-auto">
             {routes.map((route) => (
                 <NavButton
                     key={route.href}
