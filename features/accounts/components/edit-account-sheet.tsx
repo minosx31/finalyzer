@@ -26,7 +26,7 @@ export const EditAccountSheet = () => {
 
     const [ConfirmDialog, confirm] = useConfirm(
         "Are you sure?",
-        "You are about to delete this transaction. This action cannot be undone."
+        "You are about to delete this account. This action cannot be undone."
     );
     
     const accountQuery = useGetAccount(id);
