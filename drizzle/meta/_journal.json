@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1717333982304,
-      "tag": "0000_flat_solo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1717335130566,
-      "tag": "0001_daily_lockheed",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1721140006339,
-      "tag": "0002_colossal_maggott",
+      "when": 1721202416627,
+      "tag": "0000_dusty_slyde",
       "breakpoints": true
     }
   ]
