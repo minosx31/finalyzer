@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
+import summary from './summary';
 import accounts from './accounts';
 import categories from './categories';
 import transactions from './transactions';
@@ -12,6 +13,7 @@ export const runtime = 'edge';
 const app = new Hono().basePath('/api')
 
 const routes = app
+    .route("/summary", summary)
     .route("/accounts", accounts)
     .route("/categories", categories)
     .route("/transactions", transactions);
