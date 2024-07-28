@@ -21,8 +21,8 @@ const SEED_CATEGORIES = [
 ];
 
 const SEED_ACCOUNTS = [
-    { id: "account_1", name: "Checking", userId: "SEED_USER_ID", plaidId: null },
-    { id: "account_2", name: "Savings", userId: "SEED_USER_ID", plaidId: null },
+    { id: "account_1", name: "Checking", userId: SEED_USER_ID, plaidId: null },
+    { id: "account_2", name: "Savings", userId: SEED_USER_ID, plaidId: null },
 ];
 
 const defaultTo = new Date();
@@ -64,7 +64,7 @@ const generateTransactionsForDay = (day: Date) => {
         const formattedAmount = convertAmountToMiliUnits(isExpense ? -amount : amount);
 
         SEED_TRANSACTIONS.push({
-            id: `transaction_${SEED_TRANSACTIONS.length + 1}`,
+            id: `transaction_${format(day, "yyyy-MM-dd")}_${i}`,
             accountId: SEED_ACCOUNTS[0].id,
             categoryId: category.id,
             date: day,
