@@ -52,7 +52,7 @@ export function fillMissingDays(
   const transactionsByDay = allDays.map((day) => {
     const found = activeDays.find((activeDay) => isSameDay(activeDay.date, day));
 
-    if (found) found;
+    if (found) return found;
     else return {
       date: day,
       income: 0,
