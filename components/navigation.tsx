@@ -6,7 +6,13 @@ import { useState } from "react";
 import { useMedia } from "react-use";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const routes = [
     {
@@ -14,25 +20,24 @@ const routes = [
         label: "Overview",
     },
     {
-        href: "/transactions",
-        label: "Transactions",
+        href: "/manage",
+        label: "Manage"
     },
     {
-        href: "/accounts",
-        label: "Accounts",
-    },
-    {
-        href: "/categories",
-        label: "Categories",
-    },
-    {
-        href: "/settings",
-        label: "Settings",
+        href: "/tools",
+        label: "Tools",
+        subRoutes: [
+            {
+                href: "/tools/interest-calculator",
+                label: "Interest Calculator"
+            }
+        ]
     },
 ];
 
 const Navigation = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isToolsOpen, setIsToolsOpen] = useState(false);
 
     const router = useRouter();
     const pathname = usePathname();
@@ -57,16 +62,44 @@ const Navigation = () => {
                 </SheetTrigger>
                 <SheetContent side="left" className="px-2">
                     <nav className="flex flex-col gap-y-2 pt-6">
-                        {routes.map((route) => (
-                            <Button
-                                variant={route.href === pathname ? "secondary" : "ghost"}
-                                key={route.href}
-                                onClick={() => onClick(route.href)}
-                                className="w-full justify-start"
-                            >
-                                {route.label}
-                            </Button>
-                        ))}
+                        {routes.map((route) => {
+                            if (route.subRoutes) {
+                                return (
+                                    <div key={route.href}>
+                                        <Button
+                                            variant={"ghost"}
+                                            className="w-full justify-start text-left font-bold"
+                                            disabled
+                                        >
+                                            {route.label}
+                                        </Button>
+                                        {route.subRoutes.map((subRoute) => (
+                                            <Button
+                                                key={subRoute.href}
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => onClick(subRoute.href)}
+                                                className={`w-full justify-start font-normal ${pathname === subRoute.href && "bg-white/10 text-white"}`}
+                                            >
+                                                {subRoute.label}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )
+                            }
+
+                            return (
+                                <Button
+                                    key={route.href}
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => onClick(route.href)}
+                                    className={`w-full justify-start font-normal ${pathname === route.href && "bg-white/10 text-white"}`}
+                                >
+                                    {route.label}
+                                </Button>
+                            )
+                        })}
                     </nav>
                 </SheetContent>
             </Sheet>
@@ -75,14 +108,62 @@ const Navigation = () => {
 
     return (
         <nav className="hidden md:flex items-center gap-x-2 overflow-x-auto">
-            {routes.map((route) => (
-                <NavButton
-                    key={route.href}
-                    href={route.href}
-                    label={route.label}
-                    isActive={pathname === route.href}
-                />
-            ))}
+            {routes.map((route) => {
+                if (route.subRoutes) {
+                    return (
+                        <DropdownMenu key={route.href} onOpenChange={setIsToolsOpen}>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className={`
+                                        w-full
+                                        lg:w-auto
+                                        justify-between
+                                        font-normal
+                                        hover:bg-white/20
+                                        hover:text-white
+                                        border-none
+                                        focus-visible:ring-offset-0
+                                        focus-visible:ring-transparent
+                                        outline-none
+                                        text-white
+                                        transition
+                                        ${pathname.startsWith(route.href) ? "bg-white/10 font-bold" : "bg-transparent"}
+                                    `}
+                                >
+                                    {route.label}
+                                    <ChevronDown className={`size-4 ml-2 transition-transform duration-300 ${isToolsOpen ? "transform rotate-180" : ""}`} />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="bg-transparent">
+                                {route.subRoutes.map((subRoute) => (
+                                    <DropdownMenuItem
+                                        key={subRoute.href}
+                                        onSelect={() => setIsToolsOpen(false)}
+                                        asChild
+                                    >
+                                        <NavButton
+                                            key={subRoute.href}  
+                                            href={subRoute.href}
+                                            label={subRoute.label}
+                                        />
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )
+                }
+
+                return (
+                    <NavButton
+                        key={route.href}
+                        href={route.href}
+                        label={route.label}
+                        isActive={pathname === route.href}
+                    />
+                )
+            })}
         </nav>
     )
 }
