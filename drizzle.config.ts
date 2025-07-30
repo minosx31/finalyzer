@@ -1,3 +1,5 @@
+// Drizzle config file - Contains all information about database connection, migration folder and schema files. Used by Drizzle Kit.
+
 import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
 config({ path: ".env.local" });
