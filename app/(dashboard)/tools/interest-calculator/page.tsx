@@ -32,6 +32,17 @@ interface ChartData {
   principal: number;
 }
 
+const formatAxis = (tick: any) => {
+  const value = Number(tick);
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(0)}M`;
+  }
+  if (value >= 1000) {
+    return `$${(value / 1000).toFixed(0)}K`;
+  }
+  return formatCurrency(value);
+}
+
 const InterestCalcPage = () => {
   const [principal, setPrincipal] = useState<number | string>(10000);
   const [rate, setRate] = useState<number | string>(7);
@@ -40,11 +51,11 @@ const InterestCalcPage = () => {
   const [compoundingFrequency, setCompoundingFrequency] = useState<string>("12");
 
   const { chartData, finalBalance, totalInterest, totalPrincipal } = useMemo(() => {
+    const p = Number(principal) || 0;
+    const r = (Number(rate) || 0) / 100;
+    const dur = Number(duration) || 0;
+    const m = Number(monthlyContribution) || 0;
     const n = Number(compoundingFrequency);
-    const r = Number(rate) / 100;
-    const p = Number(principal);
-    const dur = Number(duration);
-    const m = Number(monthlyContribution);
 
     let currentBalance = p;
     let cumulativePrincipal = p;
@@ -62,11 +73,11 @@ const InterestCalcPage = () => {
       data.push({ year, balance: parseFloat(currentBalance.toFixed(2)), principal: cumulativePrincipal });
     }
 
-    const finalBalance = data[data.length - 1].balance;
-    const totalPrincipal = data[data.length - 1].principal;
-    const totalInterest = finalBalance - totalPrincipal;
+    const finalBalanceValue = data[data.length - 1]?.balance ?? 0;
+    const totalPrincipalValue = data[data.length - 1]?.principal ?? 0;
+    const totalInterestValue = finalBalanceValue - totalPrincipalValue;
 
-    return { chartData: data, finalBalance, totalInterest, totalPrincipal };
+    return { chartData: data, finalBalance: finalBalanceValue, totalInterest: totalInterestValue, totalPrincipal: totalPrincipalValue };
   }, [principal, rate, duration, monthlyContribution, compoundingFrequency]);
 
   return (
@@ -87,9 +98,9 @@ const InterestCalcPage = () => {
                         id="principal"
                         value={principal}
                         thousandSeparator={true}
-                        // prefix={"$"}
+                        prefix={"$"}
                         customInput={Input}
-                        onValueChange={(values) => setPrincipal(values.floatValue === undefined ? "" : values.floatValue)}
+                        onValueChange={(values) => setPrincipal(Number(values.floatValue))}
                         className="mt-1"
                       />
                     </div>
@@ -99,7 +110,7 @@ const InterestCalcPage = () => {
                         id="rate"
                         type="number"
                         value={rate}
-                        onChange={(e) => setRate(e.target.value)}
+                        onChange={(e) => setRate(Number(e.target.value))}
                         className="mt-1"
                       />
                     </div>
@@ -109,7 +120,7 @@ const InterestCalcPage = () => {
                         id="duration"
                         type="number"
                         value={duration}
-                        onChange={(e) => setDuration(e.target.value)}
+                        onChange={(e) => setDuration(Number(e.target.value))}
                         className="mt-1"
                       />
                     </div>
@@ -119,9 +130,9 @@ const InterestCalcPage = () => {
                         id="monthly-contribution"
                         value={monthlyContribution}
                         thousandSeparator={true}
-                        // prefix={"$"}
+                        prefix={"$"}
                         customInput={Input}
-                        onValueChange={(values) => setMonthlyContribution(values.floatValue === undefined ? "" : values.floatValue)}
+                        onValueChange={(values) => setMonthlyContribution(Number(values.floatValue))}
                         className="mt-1"
                       />
                     </div>
@@ -170,12 +181,14 @@ const InterestCalcPage = () => {
                       </Card>
                     </div>
                     <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={chartData}>
+                      <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 10 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="year" label={{ value: 'Years', position: 'insideBottom', offset: -5 }} />
-                        <YAxis tickFormatter={(value) => formatCurrency(value)} />
+                        <XAxis dataKey="year" label={{ value: 'Year', position: 'insideBottom', offset: -5 }} />
+                        <YAxis 
+                          tickFormatter={formatAxis}
+                          domain={['dataMin', 'dataMax']}
+                        />
                         <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        <Legend />
                         <Line type="monotone" dataKey="balance" stroke="#8884d8" name="Total Balance" />
                         <Line type="monotone" dataKey="principal" stroke="#82ca9d" name="Total Principal" />
                       </LineChart>
@@ -191,8 +204,8 @@ const InterestCalcPage = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead className="w-[100px]">Year</TableHead>
-                          <TableHead>Total Principal</TableHead>
-                          <TableHead>Total Interest</TableHead>
+                          <TableHead className="text-right">Total Principal</TableHead>
+                          <TableHead className="text-right">Total Interest</TableHead>
                           <TableHead className="text-right">End Balance</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -200,8 +213,8 @@ const InterestCalcPage = () => {
                         {chartData.map((data) => (
                           <TableRow key={data.year}>
                             <TableCell>{data.year}</TableCell>
-                            <TableCell>{formatCurrency(data.principal)}</TableCell>
-                            <TableCell>{formatCurrency(data.balance - data.principal)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(data.principal)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(data.balance - data.principal)}</TableCell>
                             <TableCell className="text-right">{formatCurrency(data.balance)}</TableCell>
                           </TableRow>
                         ))}

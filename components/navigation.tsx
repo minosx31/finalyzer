@@ -136,18 +136,14 @@ const Navigation = () => {
                                     <ChevronDown className={`size-4 ml-2 transition-transform duration-300 ${isToolsOpen ? "transform rotate-180" : ""}`} />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="bg-transparent">
+                            <DropdownMenuContent align="start" className="bg-transparent border-none">
                                 {route.subRoutes.map((subRoute) => (
                                     <DropdownMenuItem
                                         key={subRoute.href}
-                                        onSelect={() => setIsToolsOpen(false)}
-                                        asChild
+                                        onSelect={() => onClick(subRoute.href)}
+                                        className="cursor-pointer"
                                     >
-                                        <NavButton
-                                            key={subRoute.href}  
-                                            href={subRoute.href}
-                                            label={subRoute.label}
-                                        />
+                                        {subRoute.label}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
