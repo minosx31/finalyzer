@@ -1,4 +1,5 @@
-import Header from "@/components/header";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 type Props = {
     children: React.ReactNode
@@ -6,12 +7,12 @@ type Props = {
 
 const DashboardLayout = ({ children }: Props) => {
     return (
-        <>
-            <Header />
-            <main className="px-3 lg:px-14">
+        <SidebarProvider>
+            <AppSidebar />
+            <main className="w-full">
                 {children}
             </main>
-        </>
+        </SidebarProvider>
     )
 }
 export default DashboardLayout

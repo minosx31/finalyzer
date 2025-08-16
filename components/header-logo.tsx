@@ -6,7 +6,7 @@ const HeaderLogo = () => {
     <Link href="/">
         <div className="items-center hidden md:flex">
             <Image src="/logo.svg" alt="Logo" width={28} height={28} />
-            <p className="font-semibold text-white text-2xl mx-2">
+            <p className="overflow-hidden text-clip whitespace-nowrap font-semibold text-white text-xl mx-2">
                 Finalyzer
             </p>
         </div>
