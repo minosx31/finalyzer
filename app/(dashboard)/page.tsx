@@ -1,7 +1,7 @@
 import { DataCharts } from "@/components/data-charts";
 import { DataGrid } from "@/components/data-grid";
 import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset } from "@/components/ui/sidebar";
 
 export default function DashboardPage() {
   return (
@@ -9,7 +9,6 @@ export default function DashboardPage() {
       <SidebarInset>
       <header className="flex items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"

@@ -17,6 +17,7 @@ import {
   SquareTerminal,
 } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { NavOverview } from "@/components/nav-overview"
 import { NavTools } from "@/components/nav-tools"
 import {
@@ -28,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
@@ -45,7 +47,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import HeaderLogo from "./header-logo"
-import { ClerkLoaded, ClerkLoading, useUser } from "@clerk/nextjs"
+import { ClerkLoaded, ClerkLoading, UserButton, useUser, useClerk } from "@clerk/nextjs"
 
 // This is sample data.
 const data = {
@@ -179,13 +181,18 @@ const data = {
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isMobile } = useSidebar()
+  const { isMobile, state } = useSidebar()
   const { user } = useUser();
+  const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar collapsible="icon" className="group" {...props}>
-      <SidebarHeader>
-        <HeaderLogo />
+      <SidebarHeader className={cn(
+        "flex-row items-center",
+        isCollapsed ? "justify-center" : "justify-between"
+      )}>
+        <HeaderLogo className={isCollapsed ? "hidden" : "flex"} />
+        <SidebarTrigger className={isCollapsed ? "mx-auto" : ""} />
       </SidebarHeader>
       <SidebarContent>
         <NavTools items={data.navMain} />
