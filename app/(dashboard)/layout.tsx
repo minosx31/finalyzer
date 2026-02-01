@@ -1,17 +1,18 @@
-import Header from "@/components/header";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-type Props = {
-    children: React.ReactNode
-};
+export default function DashboardLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+  <SidebarProvider>
+    <AppSidebar />
+    <SidebarInset>
+      {children}
+    </SidebarInset>
+  </SidebarProvider>
 
-const DashboardLayout = ({ children }: Props) => {
-    return (
-        <>
-            <Header />
-            <main className="px-3 lg:px-14">
-                {children}
-            </main>
-        </>
-    )
+  );
 }
-export default DashboardLayout
