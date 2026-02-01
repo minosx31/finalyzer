@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TransactionsPage from "../transactions/page";
-import AccountsPage from "../accounts/page";
-import CategoriesPage from "../categories/page";
+import TransactionsPage from "./transactions/page";
+import AccountsPage from "./accounts/page";
+import CategoriesPage from "./categories/page";
 
 const ManagePage = () => {
   return (

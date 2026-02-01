@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/avatar"
 import HeaderLogo from "./header-logo"
 import { ClerkLoaded, ClerkLoading, UserButton, useUser, useClerk } from "@clerk/nextjs"
+import { NavManage } from "./nav-manage"
 
 // This is sample data.
 const data = {
@@ -195,8 +196,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarTrigger className={isCollapsed ? "mx-auto" : ""} />
       </SidebarHeader>
       <SidebarContent>
-        <NavTools items={data.navMain} />
         <NavOverview />
+        <NavManage />
+        <NavTools items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
         <ClerkLoading>

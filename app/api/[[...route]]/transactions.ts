@@ -3,7 +3,7 @@ import { transactions, insertTransactionSchema, categories, accounts } from "@/d
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { createId } from "@paralleldrive/cuid2";
 import { zValidator } from "@hono/zod-validator";
-import { and, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, sql, SQL } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { parse, subDays } from "date-fns";
@@ -14,23 +14,35 @@ const app = new Hono()
             from: z.string().optional(),
             to: z.string().optional(),
             accountId: z.string().optional(),
+            limit: z.string().optional(),
         })),
         clerkMiddleware(),
         async (c) => {
             const auth = getAuth(c);
-            const { from, to, accountId } = c.req.valid("query");
+            const { from, to, accountId, limit } = c.req.valid("query");
+            const limitNumber = limit ? parseInt(limit, 10) : undefined;
 
             if (!auth?.userId) {
                 return c.json({ error: "Unauthorized" }, 401);
             }
 
-            const defaultTo = new Date();
-            const defaultFrom = subDays(defaultTo, 30);
+            // If no date parameters provided, retrieve all transactions
+            let dateConditions: SQL[] = [];
+            if (from || to) {
+                const defaultTo = new Date();
+                const defaultFrom = subDays(defaultTo, 30);
+                
+                const startDate = from ? parse(from, "yyyy-MM-dd", new Date()) : defaultFrom;
+                const endDate = to ? parse(to, "yyyy-MM-dd", new Date()) : defaultTo;
+                
+                dateConditions = [
+                    gte(transactions.date, startDate),
+                    lte(transactions.date, endDate)
+                ];
+            }
 
-            const startDate = from ? parse(from, "yyyy-MM-dd", new Date()) : defaultFrom;
-            const endDate = to ? parse(to, "yyyy-MM-dd", new Date()) : defaultTo;
-
-            const data = await db
+            // Create query builder
+            const queryBuilder = db
                 .select({
                     id: transactions.id,
                     date: transactions.date,
@@ -49,11 +61,15 @@ const app = new Hono()
                     and(
                         accountId ? eq(transactions.accountId, accountId) : undefined,
                         eq(accounts.userId, auth.userId),
-                        gte(transactions.date, startDate),
-                        lte(transactions.date, endDate),
+                        ...dateConditions
                     )
                 )
                 .orderBy(desc(transactions.date));
+
+            // Apply limit if specified
+            const data = limitNumber 
+                ? await queryBuilder.limit(limitNumber)
+                : await queryBuilder;
 
             return c.json({ data });
         }

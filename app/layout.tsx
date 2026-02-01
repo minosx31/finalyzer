@@ -8,8 +8,6 @@ import { QueryProvider } from "@/providers/query-provider";
 import { SheetProvider } from "@/providers/sheet-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,10 +32,7 @@ export default function RootLayout({
             >
               <SheetProvider />
               <Toaster />
-              <SidebarProvider>
-                <AppSidebar />
-                <main>{children}</main>
-              </SidebarProvider>
+                {children}
             </ThemeProvider>
           </QueryProvider>
         </body>

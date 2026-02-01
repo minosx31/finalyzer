@@ -1,8 +1,11 @@
 "use client"
 
 import {
+  BadgeDollarSign,
   LayoutDashboard,
   LineChart,
+  WalletCards,
+  BarChartIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -15,23 +18,28 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavOverview() {
+export function NavManage() {
   const items = [
     {
-      name: "Dashboard",
-      url: "/",
-      icon: LayoutDashboard
+      name: "Accounts",
+      url: "/manage/accounts",
+      icon: WalletCards
     },
     {
-      name: "Test Dashboard",
-      url: "/test",
-      icon: LineChart
+      name: "Transactions",
+      url: "/manage/transactions",
+      icon: BadgeDollarSign
+    },
+    {
+      name: "Categories",
+      url: "/manage/categories",
+      icon: BarChartIcon
     }
   ]
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Overview</SidebarGroupLabel>
+      <SidebarGroupLabel>Manage</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
