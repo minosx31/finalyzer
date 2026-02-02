@@ -26,7 +26,7 @@ const app = new Hono()
                 .where(eq(accounts.userId, auth.userId));
 
             return c.json({ data });
-    })
+        })
     .get(
         "/:id",
         zValidator("param", z.object({
@@ -57,7 +57,7 @@ const app = new Hono()
                         eq(accounts.id, id)
                     ),
                 );
-            
+
             if (!data) {
                 return c.json({ error: "Not found" }, 404);
             }
@@ -69,6 +69,10 @@ const app = new Hono()
         clerkMiddleware(),
         zValidator("json", insertAccountSchema.pick({
             name: true,
+            type: true,
+            creditLimit: true,
+            dueDate: true,
+            interestRate: true,
         })),
         async (c) => {
             const auth = getAuth(c);
@@ -132,6 +136,10 @@ const app = new Hono()
             "json",
             insertAccountSchema.pick({
                 name: true,
+                type: true,
+                creditLimit: true,
+                dueDate: true,
+                interestRate: true,
             })
         ),
         async (c) => {
@@ -140,7 +148,7 @@ const app = new Hono()
             const values = c.req.valid("json");
 
             if (!id) {
-                return c.json({ error: "Missing id"}, 400);
+                return c.json({ error: "Missing id" }, 400);
             }
 
             if (!auth?.userId) {
@@ -157,7 +165,7 @@ const app = new Hono()
                     ),
                 )
                 .returning();
-            
+
             if (!data) {
                 return c.json({ error: "Not found" }, 404);
             }
@@ -179,7 +187,7 @@ const app = new Hono()
             const { id } = c.req.valid("param");
 
             if (!id) {
-                return c.json({ error: "Missing id"}, 400);
+                return c.json({ error: "Missing id" }, 400);
             }
 
             if (!auth?.userId) {
@@ -197,7 +205,7 @@ const app = new Hono()
                 .returning({
                     id: accounts.id,
                 });
-            
+
             if (!data) {
                 return c.json({ error: "Not found" }, 404);
             }

@@ -10,7 +10,7 @@ import { useCreateAccount } from "@/features/accounts/api/use-create-account";
 import { useCreateCategory } from "@/features/categories/api/use-create-category";
 import { useGetCategories } from "@/features/categories/api/use-get-categories";
 import { useCreateTransaction } from "@/features/transactions/api/use-create-transaction";
-import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
+import { useSheet } from "@/hooks/use-sheet";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { insertTransactionSchema } from "@/db/schema";
 import { z } from "zod";
@@ -23,7 +23,7 @@ const formSchema = insertTransactionSchema.omit({
 type FormValues = z.infer<typeof formSchema>;
 
 export const NewTransactionSheet = () => {
-    const { isOpen, onClose } = useNewTransaction();
+    const { isOpen, onClose } = useSheet();
 
     const mutation = useCreateTransaction();
 

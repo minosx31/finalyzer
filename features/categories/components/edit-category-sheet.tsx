@@ -6,10 +6,10 @@ import {
     SheetDescription,
 } from "@/components/ui/sheet";
 import { CategoryForm } from "@/features/categories/components/category-form";
-import { useOpenCategory } from "@/features/categories/hooks/use-open-category";
 import { useGetCategory } from "@/features/categories/api/use-get-category";
 import { useEditCategory } from "@/features/categories/api/use-edit-category";
 import { useDeleteCategory } from "@/features/categories/api/use-delete-category";
+import { useSheet } from "@/hooks/use-sheet";
 import { insertCategorySchema } from "@/db/schema";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -21,8 +21,12 @@ const formSchema = insertCategorySchema.pick({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const EditCategorySheet = () => {
-    const { isOpen, onClose, id } = useOpenCategory();
+type Props = {
+    id?: string;
+};
+
+export const EditCategorySheet = ({ id }: Props) => {
+    const { isOpen, onClose } = useSheet();
 
     const [ConfirmDialog, confirm] = useConfirm(
         "Are you sure?",

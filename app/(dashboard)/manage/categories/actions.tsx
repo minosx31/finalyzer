@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useDeleteCategory } from "@/features/categories/api/use-delete-category";
-import { useOpenCategory } from "@/features/categories/hooks/use-open-category";
+import { useSheet } from "@/hooks/use-sheet";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 
@@ -12,7 +12,7 @@ type Props = {
 }
 
 export const Actions = ({ id }: Props) => {
-    const { onOpen } = useOpenCategory();
+    const { onOpen } = useSheet();
     const deleteMutation = useDeleteCategory(id);
     const [ConfirmDialog, confirm] = useConfirm(
         "Are you sure?",
@@ -41,7 +41,7 @@ export const Actions = ({ id }: Props) => {
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem
                         disabled={deleteMutation.isPending}
-                        onClick={() => onOpen(id)}
+                        onClick={() => onOpen("edit-category", { id })}
                     >
                         <Edit className="size-4 mr-2" />
                         Edit

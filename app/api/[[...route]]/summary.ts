@@ -1,5 +1,5 @@
 import { db } from "@/db/drizzle";
-import { accounts, categories, transactions } from "@/db/schema";
+import { accounts, categories, transactions, goals } from "@/db/schema";
 import { calculatePercentageChange, fillMissingDays } from "@/lib/utils";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { zValidator } from "@hono/zod-validator";
@@ -22,7 +22,7 @@ const app = new Hono()
         ),
         async (c) => {
             const auth = getAuth(c);
-            
+
             const { from, to, accountId } = c.req.valid("query");
 
             if (!auth?.userId) {
@@ -49,22 +49,22 @@ const app = new Hono()
                     expenses: sql`SUM(CASE WHEN ${transactions.amount} < 0 THEN ${transactions.amount} ELSE 0 END)`.mapWith(Number),
                     remaining: sum(transactions.amount).mapWith(Number),
                 })
-                .from(transactions)
-                .innerJoin(
-                    accounts,
-                    eq(
-                        transactions.accountId,
-                        accounts.id,
-                    ),
-                )
-                .where(
-                    and(
-                        accountId ? eq(transactions.accountId, accountId) : undefined,
-                        eq(accounts.userId, userId),
-                        gte(transactions.date, startDate),
-                        lte(transactions.date, endDate),
+                    .from(transactions)
+                    .innerJoin(
+                        accounts,
+                        eq(
+                            transactions.accountId,
+                            accounts.id,
+                        ),
                     )
-                );
+                    .where(
+                        and(
+                            accountId ? eq(transactions.accountId, accountId) : undefined,
+                            eq(accounts.userId, userId),
+                            gte(transactions.date, startDate),
+                            lte(transactions.date, endDate),
+                        )
+                    );
             }
             const [currentPeriod] = await fetchFinancialData(
                 auth.userId,
@@ -155,12 +155,38 @@ const app = new Hono()
                 )
                 .groupBy(transactions.date)
                 .orderBy(transactions.date);
-                
+
             const days = fillMissingDays(
                 activeDays,
                 startDate,
                 endDate
             )
+
+            // Fetch accounts with computed balance (from transactions)
+            const accountsData = await db
+                .select({
+                    id: accounts.id,
+                    name: accounts.name,
+                    type: accounts.type,
+                    creditLimit: accounts.creditLimit,
+                    dueDate: accounts.dueDate,
+                    interestRate: accounts.interestRate,
+                    balance: sql`COALESCE(SUM(${transactions.amount}), 0)`.mapWith(Number),
+                })
+                .from(accounts)
+                .leftJoin(
+                    transactions,
+                    eq(accounts.id, transactions.accountId)
+                )
+                .where(eq(accounts.userId, auth.userId))
+                .groupBy(accounts.id, accounts.name, accounts.type, accounts.creditLimit, accounts.dueDate, accounts.interestRate);
+
+            // Fetch goals
+            const goalsData = await db
+                .select()
+                .from(goals)
+                .where(eq(goals.userId, auth.userId));
+
 
             return c.json({
                 data: {
@@ -172,6 +198,8 @@ const app = new Hono()
                     expensesChange: expensesChange,
                     categories: finalCategories,
                     days,
+                    accounts: accountsData,
+                    goals: goalsData,
                 },
             });
         },

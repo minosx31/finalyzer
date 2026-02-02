@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNewAccount } from "@/features/accounts/hooks/use-new-account";
+import { useSheet } from "@/hooks/use-sheet";
 import { Loader2, Plus } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBulkDeleteAccounts } from "@/features/accounts/api/use-bulk-delete-accounts";
 
 const AccountsPage = () => {
-    const newAccount = useNewAccount();
+    const { onOpen } = useSheet();
     const deleteAccounts = useBulkDeleteAccounts();
     const accountsQuery = useGetAccounts();
     const accounts = accountsQuery.data || [];
@@ -42,7 +42,7 @@ const AccountsPage = () => {
                     <CardTitle className="text-xl line-clamp-1">
                         Accounts Page
                     </CardTitle>
-                    <Button size="sm" onClick={newAccount.onOpen}>
+                    <Button size="sm" onClick={() => onOpen("new-account")}>
                         <Plus className="size-4 mr-2" />
                         Add New
                     </Button>

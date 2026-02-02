@@ -184,6 +184,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isMobile, state } = useSidebar()
   const { user } = useUser();
+  const { openUserProfile, signOut } = useClerk();
   const isCollapsed = state === "collapsed";
 
   return (
@@ -212,7 +213,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage src={user?.imageUrl} alt={user?.username ?? ""} />
@@ -245,13 +246,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <DropdownMenuSeparator />
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => openUserProfile()}
+                      className="cursor-pointer"
+                    >
                       <BadgeCheck className="text-muted-foreground"/>
                       Account
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => signOut()}
+                    className="cursor-pointer"
+                  >
                     <LogOut className="text-muted-foreground"/>
                     Sign Out
                   </DropdownMenuItem>

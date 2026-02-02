@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
+import { useSheet } from "@/hooks/use-sheet";
 import { Loader2, Plus } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
@@ -40,7 +40,7 @@ const TransactionsPage = () => {
         setVariant(VARIANTS.LIST);
     };
 
-    const newTransaction = useNewTransaction();
+    const { onOpen } = useSheet();
     const createTransactions = useBulkCreateTransactions();
     const deleteTransactions = useBulkDeleteTransactions();
     const transactionsQuery = useGetTransactions();
@@ -110,7 +110,7 @@ const TransactionsPage = () => {
                     <div className="flex flex-col md:flex-row gap-y-2 items-center gap-x-2">
                         <Button
                             size="sm"
-                            onClick={newTransaction.onOpen}
+                            onClick={() => onOpen("new-transaction")}
                             className="w-full md:w-auto"
                         >
                             <Plus className="size-4 mr-2" />

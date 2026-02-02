@@ -5,7 +5,7 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet";
-import { useNewAccount } from "@/features/accounts/hooks/use-new-account";
+import { useSheet } from "@/hooks/use-sheet";
 import { AccountForm } from "@/features/accounts/components/account-form";
 import { insertAccountSchema } from "@/db/schema";
 import { z } from "zod";
@@ -18,7 +18,7 @@ const formSchema = insertAccountSchema.pick({
 type FormValues = z.infer<typeof formSchema>;
 
 export const NewAccountSheet = () => {
-    const { isOpen, onClose } = useNewAccount();
+    const { isOpen, onClose } = useSheet();
 
     const mutation = useCreateAccount();
 

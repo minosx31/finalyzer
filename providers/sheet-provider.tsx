@@ -2,6 +2,8 @@
 
 import { useMountedState } from "react-use";
 
+import { useSheet } from "@/hooks/use-sheet";
+
 import { NewAccountSheet } from "@/features/accounts/components/new-account-sheet";
 import { EditAccountSheet } from "@/features/accounts/components/edit-account-sheet";
 
@@ -13,19 +15,22 @@ import { EditTransactionSheet } from "@/features/transactions/components/edit-tr
 
 export const SheetProvider = () => {
     const isMounted = useMountedState();
+    const { type, isOpen, data } = useSheet();
 
     if (!isMounted) return null;
 
+    if (!isOpen) return null;
+
     return (
         <>
-            <NewAccountSheet />
-            <EditAccountSheet />
+            {type === "new-account" && <NewAccountSheet />}
+            {type === "edit-account" && <EditAccountSheet id={data.id} />}
 
-            <NewCategorySheet />
-            <EditCategorySheet />
+            {type === "new-category" && <NewCategorySheet />}
+            {type === "edit-category" && <EditCategorySheet id={data.id} />}
 
-            <NewTransactionSheet />
-            <EditTransactionSheet />
+            {type === "new-transaction" && <NewTransactionSheet />}
+            {type === "edit-transaction" && <EditTransactionSheet id={data.id} />}
         </>
     )
 }

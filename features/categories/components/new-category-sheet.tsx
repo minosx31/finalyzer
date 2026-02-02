@@ -5,6 +5,7 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet";
+import { useSheet } from "@/hooks/use-sheet";
 import { useNewCategory } from "@/features/categories/hooks/use-new-category";
 import { CategoryForm } from "@/features/categories/components/category-form";
 import { useCreateCategory } from "@/features/categories/api/use-create-category";
@@ -18,7 +19,7 @@ const formSchema = insertCategorySchema.pick({
 type FormValues = z.infer<typeof formSchema>;
 
 export const NewCategorySheet = () => {
-    const { isOpen, onClose } = useNewCategory();
+    const { isOpen, onClose } = useSheet();
 
     const mutation = useCreateCategory();
 

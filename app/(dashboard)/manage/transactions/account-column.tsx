@@ -1,4 +1,4 @@
-import { useOpenAccount } from "@/features/accounts/hooks/use-open-account";
+import { useSheet } from "@/hooks/use-sheet";
 
 type Props = {
     account: string;
@@ -9,10 +9,10 @@ export const AccountColumn = ({
     account,
     accountId,
 }: Props) => {
-    const { onOpen: onOpenAccount } = useOpenAccount();
+    const { onOpen } = useSheet();
 
     const onClick = () => {
-        onOpenAccount(accountId);
+        onOpen("edit-account", { id: accountId });
     };
 
     return (

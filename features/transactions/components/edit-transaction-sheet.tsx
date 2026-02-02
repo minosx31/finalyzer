@@ -6,10 +6,10 @@ import {
     SheetDescription,
 } from "@/components/ui/sheet";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
-import { useOpenTransaction } from "@/features/transactions/hooks/use-open-transaction";
 import { useGetTransaction } from "@/features/transactions/api/use-get-transaction";
 import { useEditTransaction } from "@/features/transactions/api/use-edit-transaction";
 import { useDeleteTransaction } from "@/features/transactions/api/use-delete-transaction";
+import { useSheet } from "@/hooks/use-sheet";
 import { insertTransactionSchema } from "@/db/schema";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -25,8 +25,12 @@ const formSchema = insertTransactionSchema.omit({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const EditTransactionSheet = () => {
-    const { isOpen, onClose, id } = useOpenTransaction();
+type Props = {
+    id?: string;
+};
+
+export const EditTransactionSheet = ({ id }: Props) => {
+    const { isOpen, onClose } = useSheet();
 
     const [ConfirmDialog, confirm] = useConfirm(
         "Are you sure?",

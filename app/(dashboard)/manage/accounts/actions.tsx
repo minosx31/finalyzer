@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useDeleteAccount } from "@/features/accounts/api/use-delete-account";
-import { useOpenAccount } from "@/features/accounts/hooks/use-open-account";
+import { useSheet } from "@/hooks/use-sheet";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 
@@ -12,7 +12,7 @@ type Props = {
 }
 
 export const Actions = ({ id }: Props) => {
-    const { onOpen } = useOpenAccount();
+    const { onOpen } = useSheet();
     const deleteMutation = useDeleteAccount(id);
     const [ConfirmDialog, confirm] = useConfirm(
         "Are you sure?",
@@ -41,7 +41,7 @@ export const Actions = ({ id }: Props) => {
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem
                         disabled={deleteMutation.isPending}
-                        onClick={() => onOpen(id)}
+                        onClick={() => onOpen("edit-account", { id })}
                     >
                         <Edit className="size-4 mr-2" />
                         Edit

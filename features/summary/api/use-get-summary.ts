@@ -38,7 +38,17 @@ export const useGetSummary = () => {
                     ...day,
                     income: convertAmountFromMiliUnits(day.income),
                     expenses: convertAmountFromMiliUnits(day.expenses),
-                }))
+                })),
+                accounts: data.accounts.map((account) => ({
+                    ...account,
+                    balance: convertAmountFromMiliUnits(account.balance),
+                    creditLimit: account.creditLimit ? convertAmountFromMiliUnits(account.creditLimit) : undefined,
+                })),
+                goals: data.goals.map((goal) => ({
+                    ...goal,
+                    targetAmount: convertAmountFromMiliUnits(goal.targetAmount),
+                    currentAmount: convertAmountFromMiliUnits(goal.currentAmount),
+                })),
             };
         }
     })
