@@ -8,8 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useGetSummary } from "@/features/summary/api/use-get-summary";
 import { useGetTransactions } from "@/features/transactions/api/use-get-transactions";
+import { useGetProfile } from "@/features/profile/api/use-get-profile";
 import { formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import {
   ArrowDownIcon,
   ArrowRightIcon,
@@ -20,6 +21,8 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
   WalletIcon,
+  HeartPulse,
+  X,
 } from "lucide-react";
 import {
   Area,
@@ -43,6 +46,14 @@ import Link from "next/link";
 export default function DashboardPage() {
   const { data: summaryData, isLoading: isSummaryLoading } = useGetSummary();
   const { data: transactions, isLoading: isTransactionsLoading } = useGetTransactions({ limit: 5 });
+  const { data: profile } = useGetProfile();
+  const [bannerDismissed, setBannerDismissed] = React.useState(false);
+
+  const showHealthCheckBanner = !bannerDismissed && profile !== undefined && (
+    profile === null ||
+    !profile.lastHealthCheckAt ||
+    new Date(profile.lastHealthCheckAt) < subDays(new Date(), 30)
+  );
 
   if (isSummaryLoading || isTransactionsLoading) {
     return <div className="p-6">Loading dashboard data...</div>;
@@ -113,6 +124,28 @@ export default function DashboardPage() {
   return (
     <div className="p-6 max-w-[1600px] mx-auto pt-8">
       <div className="flex flex-col gap-4">
+        {/* Health Check Banner */}
+        {showHealthCheckBanner && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="flex items-center gap-2">
+              <HeartPulse className="size-4 shrink-0" />
+              <span>
+                Time for your monthly financial health check.{" "}
+                <Link href="/insights/health-score" className="font-semibold underline underline-offset-2">
+                  View your Health Score →
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={() => setBannerDismissed(true)}
+              className="shrink-0 rounded p-0.5 hover:bg-amber-100"
+              aria-label="Dismiss"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Financial Dashboard</h1>

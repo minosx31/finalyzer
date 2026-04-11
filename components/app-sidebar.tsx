@@ -2,24 +2,33 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
-  BadgeCheck,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Loader2,
+  Banknote,
+  Calculator,
+  CalendarClock,
+  LayoutDashboard,
+  Layers,
+  Target,
+  ArrowRightLeft,
   LogOut,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+  BadgeCheck,
+  Wallet,
+  Shield,
+  TrendingDown,
+  Activity,
+  TrendingUp,
+  LineChart,
+  Briefcase,
+  User,
+  Receipt,
+  Building2,
+  HeartPulse,
+  Landmark,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { NavOverview } from "@/components/nav-overview"
-import { NavTools } from "@/components/nav-tools"
+// import { NavOverview } from "@/components/nav-overview" // Removed as we will put Dashboard directly in main nav
+// import { NavManage } from "./nav-manage" // Removed in favor of unified lists
+import { NavTools } from "@/components/nav-tools" // We can reuse this component or just map directly
 import {
   Sidebar,
   SidebarContent,
@@ -47,144 +56,71 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import HeaderLogo from "./header-logo"
-import { ClerkLoaded, ClerkLoading, UserButton, useUser, useClerk } from "@clerk/nextjs"
-import { NavManage } from "./nav-manage"
+import { ClerkLoaded, ClerkLoading, useUser, useClerk } from "@clerk/nextjs"
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const navItems = [
+  {
+    title: "Overview",
+    items: [
+      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+    ],
   },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
-
+  {
+    title: "Manage",
+    items: [
+      { title: "Transactions",       url: "/manage/transactions", icon: ArrowRightLeft },
+      { title: "Accounts",           url: "/manage/accounts",     icon: Banknote },
+      { title: "Categories",         url: "/manage/categories",   icon: Layers },
+      { title: "Recurring Expenses", url: "/manage/recurring",    icon: CalendarClock },
+    ],
+  },
+  {
+    title: "Planning",
+    items: [
+      { title: "Goals",              url: "/manage/goals",               icon: Target },
+      { title: "Budget Planner",     url: "/planning/budgets",           icon: Wallet },
+      { title: "Emergency Fund",     url: "/planning/emergency-fund",    icon: Shield },
+      { title: "Debt Payoff Planner",url: "/planning/debt-planner",      icon: TrendingDown },
+    ],
+  },
+  {
+    title: "Insights",
+    items: [
+      { title: "Health Score",       url: "/insights/health-score",       icon: HeartPulse },
+      { title: "Cashflow Forecast",  url: "/insights/cashflow-forecast",  icon: TrendingUp },
+      { title: "Net Worth History",  url: "/insights/net-worth",          icon: LineChart },
+    ],
+  },
+  {
+    title: "Investments",
+    items: [
+      { title: "Portfolio",          url: "/investments",                 icon: Briefcase },
+    ],
+  },
+  {
+    title: "Personal",
+    items: [
+      { title: "Profile",            url: "/personal/profile",            icon: User },
+      { title: "Income Tax",         url: "/personal/tax-calculator",     icon: Receipt },
+      { title: "CPF Tracker",        url: "/personal/cpf",                icon: Landmark },
+    ],
+  },
+  {
+    title: "Tools",
+    items: [
+      { title: "Interest Calculator", url: "/tools/interest-calculator",  icon: Calculator },
+    ],
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isMobile, state } = useSidebar()
   const { user } = useUser();
   const { openUserProfile, signOut } = useClerk();
+  const pathname = usePathname();
   const isCollapsed = state === "collapsed";
 
   return (
@@ -197,16 +133,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarTrigger className={isCollapsed ? "mx-auto" : ""} />
       </SidebarHeader>
       <SidebarContent>
-        <NavOverview />
-        <NavManage />
-        <NavTools items={data.navMain} />
+        {navItems.map((group) => (
+            <div key={group.title} className="p-2">
+                {!isCollapsed && <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">{group.title}</div>}
+                <SidebarMenu>
+                    {group.items.map((item) => {
+                        const isActive = pathname === item.url;
+                        return (
+                            <SidebarMenuItem key={item.title}>
+                                <SidebarMenuButton 
+                                    asChild 
+                                    isActive={isActive}
+                                    tooltip={item.title}
+                                >
+                                    <Link href={item.url}>
+                                        <item.icon className="h-4 w-4" />
+                                        <span>{item.title}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        )
+                    })}
+                </SidebarMenu>
+            </div>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <ClerkLoading>
-            <Loader2 className="size-8 animate-spin text-slate-400" />
+            <div className="flex items-center justify-center p-4">
+                 <Loader2 className="size-8 animate-spin text-slate-400" />
+            </div>
         </ClerkLoading>
         <ClerkLoaded>
-          {/* <UserButton /> */}
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -223,6 +181,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <span className="truncate font-medium">{user?.username}</span>
                       <span className="truncate text-xs">{user?.emailAddresses[0].emailAddress}</span>
                     </div>
+                    {/* <Settings className="ml-auto size-4" /> */}
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -250,7 +209,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       onClick={() => openUserProfile()}
                       className="cursor-pointer"
                     >
-                      <BadgeCheck className="text-muted-foreground"/>
+                      <BadgeCheck className="mr-2 h-4 w-4 text-muted-foreground"/>
                       Account
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -259,7 +218,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     onClick={() => signOut()}
                     className="cursor-pointer"
                   >
-                    <LogOut className="text-muted-foreground"/>
+                    <LogOut className="mr-2 h-4 w-4 text-muted-foreground"/>
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>

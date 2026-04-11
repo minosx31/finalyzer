@@ -13,9 +13,13 @@ import { useCreateAccount } from "../api/use-create-account";
 
 const formSchema = insertAccountSchema.pick({
     name: true,
+    type: true,
+    creditLimit: true,
+    dueDate: true,
+    interestRate: true,
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.input<typeof formSchema>;
 
 export const NewAccountSheet = () => {
     const { isOpen, onClose } = useSheet();
@@ -44,6 +48,10 @@ export const NewAccountSheet = () => {
                     disabled={mutation.isPending}
                     defaultValues={{
                         name: "",
+                        type: undefined,
+                        creditLimit: undefined,
+                        dueDate: undefined,
+                        interestRate: undefined,
                     }}
                 />
             </SheetContent>

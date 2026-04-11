@@ -21,6 +21,11 @@ const app = new Hono()
                 .select({
                     id: accounts.id,
                     name: accounts.name,
+                    type: accounts.type,
+                    balance: accounts.balance,
+                    creditLimit: accounts.creditLimit,
+                    dueDate: accounts.dueDate,
+                    interestRate: accounts.interestRate,
                 })
                 .from(accounts)
                 .where(eq(accounts.userId, auth.userId));
@@ -49,6 +54,11 @@ const app = new Hono()
                 .select({
                     id: accounts.id,
                     name: accounts.name,
+                    type: accounts.type,
+                    balance: accounts.balance,
+                    creditLimit: accounts.creditLimit,
+                    dueDate: accounts.dueDate,
+                    interestRate: accounts.interestRate,
                 })
                 .from(accounts)
                 .where(

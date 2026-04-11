@@ -22,6 +22,14 @@ export function formatCurrency(value: number) {
   }).format(value);
 };
 
+export function formatSGD(value: number) {
+  return Intl.NumberFormat("en-SG", {
+    style: "currency",
+    currency: "SGD",
+    minimumFractionDigits: 2,
+  }).format(value);
+};
+
 export function calculatePercentageChange(
   current: number,
   previous: number,

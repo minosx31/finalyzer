@@ -10,16 +10,22 @@ import { useGetAccount } from "@/features/accounts/api/use-get-account";
 import { useEditAccount } from "@/features/accounts/api/use-edit-account";
 import { useDeleteAccount } from "@/features/accounts/api/use-delete-account";
 import { useSheet } from "@/hooks/use-sheet";
-import { insertAccountSchema } from "@/db/schema";
-import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
+import { convertAmountFromMiliUnits } from "@/lib/utils";
+import { insertAccountSchema } from "@/db/schema";
+import { z } from "zod";
 
+// We use the same schema as the internal component output for typing
 const formSchema = insertAccountSchema.pick({
     name: true,
+    type: true,
+    creditLimit: true,
+    dueDate: true,
+    interestRate: true,
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.input<typeof formSchema>;
 
 type Props = {
     id?: string;
@@ -63,8 +69,22 @@ export const EditAccountSheet = ({ id }: Props) => {
 
     const defaultValues = accountQuery.data ? {
         name: accountQuery.data.name,
+        type: accountQuery.data.type || undefined,
+        creditLimit: accountQuery.data.creditLimit 
+            ? convertAmountFromMiliUnits(accountQuery.data.creditLimit).toString() 
+            : undefined,
+        dueDate: accountQuery.data.dueDate 
+            ? accountQuery.data.dueDate.toString() 
+            : undefined,
+        interestRate: accountQuery.data.interestRate 
+            ? (accountQuery.data.interestRate / 100).toString() 
+            : undefined,
     } : {
         name: "",
+        type: undefined,
+        creditLimit: undefined,
+        dueDate: undefined,
+        interestRate: undefined,
     };
 
     return (

@@ -6,7 +6,15 @@ export type SheetType =
     | "new-category"
     | "edit-category"
     | "new-transaction"
-    | "edit-transaction";
+    | "edit-transaction"
+    | "new-goal"
+    | "edit-goal"
+    | "new-recurring"
+    | "edit-recurring"
+    | "new-budget"
+    | "edit-budget"
+    | "new-investment"
+    | "edit-investment";
 
 type SheetStore = {
     isOpen: boolean;
