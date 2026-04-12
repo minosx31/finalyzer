@@ -1,14 +1,12 @@
 "use client";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSheet } from "@/hooks/use-sheet";
 import { Loader2, Plus } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
-import { useGetTransactions } from "@/features/transactions/api/use-get-transactions";
+import { useGetTransactions, useBulkCreateTransactions, useBulkDeleteTransactions } from "@/features/transactions/api/index";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBulkCreateTransactions } from "@/features/transactions/api/use-bulk-create-transactions";
-import { useBulkDeleteTransactions } from "@/features/transactions/api/use-bulk-delete-transactions";
 import { useSelectAccount } from "@/features/accounts/hooks/use-select-account";
 import { useState } from "react";
 import { UploadButton } from "./upload-button";
@@ -40,7 +38,6 @@ const TransactionsPage = () => {
         setVariant(VARIANTS.LIST);
     };
 
-    const { onOpen } = useSheet();
     const createTransactions = useBulkCreateTransactions();
     const deleteTransactions = useBulkDeleteTransactions();
     const transactionsQuery = useGetTransactions();
@@ -108,13 +105,11 @@ const TransactionsPage = () => {
                         Transactions Page
                     </CardTitle>
                     <div className="flex flex-col md:flex-row gap-y-2 items-center gap-x-2">
-                        <Button
-                            size="sm"
-                            onClick={() => onOpen("new-transaction")}
-                            className="w-full md:w-auto"
-                        >
-                            <Plus className="size-4 mr-2" />
-                            Add New
+                        <Button size="sm" asChild className="w-full md:w-auto">
+                            <Link href="/manage/transactions/new">
+                                <Plus className="size-4 mr-2" />
+                                Add New
+                            </Link>
                         </Button>
                         <UploadButton
                             onUpload={onUpload}

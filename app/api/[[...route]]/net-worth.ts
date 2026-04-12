@@ -39,7 +39,7 @@ const app = new Hono()
                 .select({
                     id: accounts.id,
                     type: accounts.type,
-                    balance: accounts.balance,
+                    initialBalance: accounts.initialBalance,
                     creditLimit: accounts.creditLimit,
                 })
                 .from(accounts)
@@ -52,7 +52,7 @@ const app = new Hono()
             let totalLiabilities = 0;
 
             for (const account of userAccounts) {
-                const balance = account.balance ?? 0;
+                const balance = account.initialBalance ?? 0;
                 if (account.type === "credit") {
                     // For credit accounts, positive balance means debt (liability)
                     totalLiabilities += Math.max(0, balance);

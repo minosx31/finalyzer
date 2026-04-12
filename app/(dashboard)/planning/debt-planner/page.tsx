@@ -13,7 +13,7 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
+import { useGetAccounts } from "@/features/accounts/api/index";
 import { computeAvalanche, computeSnowball, type Debt } from "@/lib/debt-payoff";
 import { convertAmountFromMiliUnits, formatSGD } from "@/lib/utils";
 
@@ -34,8 +34,8 @@ const DebtPlannerPage = () => {
     const debts: Debt[] = creditAccounts.map((a) => {
         // balance from GET /accounts is nullable and represents a cached value
         // We use Math.abs of a negative balance, or creditLimit as a rough fallback
-        const outstandingMilli = a.balance != null && a.balance < 0
-            ? Math.abs(a.balance)
+        const outstandingMilli = a.initialBalance != null && a.initialBalance < 0
+            ? Math.abs(a.initialBalance)
             : a.creditLimit ?? 0;
         const minPayment = Math.round(outstandingMilli * 0.02); // standard 2% min payment
         return {

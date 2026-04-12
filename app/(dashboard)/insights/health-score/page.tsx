@@ -10,9 +10,9 @@ import { Loader2, HeartPulse, CheckCircle2, AlertTriangle, XCircle, Info, ArrowR
 import Link from "next/link";
 
 import { useGetProfile } from "@/features/profile/api/use-get-profile";
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
+import { useGetAccounts } from "@/features/accounts/api/index";
 import { useGetEmergencyFund } from "@/features/emergency-fund/api/use-get-emergency-fund";
-import { useGetGoals } from "@/features/goals/api/use-get-goals";
+import { useGetGoals } from "@/features/goals/api/index";
 import { useMarkHealthCheck } from "@/features/profile/api/use-mark-health-check";
 import { computeHealthScore, type HealthScoreInput } from "@/lib/financial-health";
 
@@ -118,7 +118,7 @@ const HealthScorePage = () => {
     const creditAccounts = accounts.filter((a) => a.type === "credit");
     const totalCreditLimit = creditAccounts.reduce((s, a) => s + (a.creditLimit ?? 0), 0);
     const totalCreditBalance = creditAccounts.reduce((s, a) => {
-        const b = a.balance ?? 0;
+        const b = a.initialBalance ?? 0;
         return s + (b < 0 ? Math.abs(b) : 0);
     }, 0);
 
