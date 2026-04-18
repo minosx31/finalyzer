@@ -5,13 +5,15 @@ import { useSearchParams } from "next/navigation";
 
 interface UseGetTransactionsOptions {
     limit?: number;
+    /** When provided, overrides the `accountId` URL search param for filtering. */
+    accountId?: string;
 }
 
 export const useGetTransactions = (options: UseGetTransactionsOptions = {}) => {
     const params = useSearchParams();
     const from = params.get("from") || "";
     const to = params.get("to") || "";
-    const accountId = params.get("accountId") || "";
+    const accountId = options.accountId ?? (params.get("accountId") || "");
     const { limit } = options;
 
     const query = useQuery({
@@ -36,7 +38,7 @@ export const useGetTransactions = (options: UseGetTransactionsOptions = {}) => {
                 amount: convertAmountFromMiliUnits(transaction.amount),
             }));
         }
-    })
+    });
 
     return query;
-}
+};

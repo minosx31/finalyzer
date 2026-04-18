@@ -14,17 +14,21 @@ import { convertAmountFromMiliUnits, convertAmountToMiliUnits } from "@/lib/util
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
     type: z.string().optional(),
-    creditLimit: z.string().optional(), // User inputs "1000.00"
-    dueDate: z.string().optional(), // User selects "5"
-    interestRate: z.string().optional(), // User inputs "5.5"
+    initialBalance: z.string().optional(), // User inputs "1000.00"
+    creditLimit: z.string().optional(),    // User inputs "1000.00"
+    dueDate: z.string().optional(),        // User selects "5"
+    interestRate: z.string().optional(),   // User inputs "5.5"
+    currency: z.string().optional(),
 });
 
 const apiSchema = insertAccountSchema.pick({
     name: true,
     type: true,
+    initialBalance: true,
     creditLimit: true,
     dueDate: true,
     interestRate: true,
+    currency: true,
 });
 
 type FormValues = z.input<typeof formSchema>;
@@ -32,9 +36,7 @@ type ApiValues = z.input<typeof apiSchema>;
 
 type Props = {
     id?: string,
-    defaultValues?: FormValues, 
-    // The parent should pass transformed string values for the form state.
-    
+    defaultValues?: FormValues,
     onSubmit: (values: ApiValues) => void,
     onDelete?: () => void,
     disabled?: boolean,
@@ -64,6 +66,7 @@ export const AccountForm = ({
     });
 
     const handleSubmit = (values: FormValues) => {
+        const initialBalance = values.initialBalance ? convertAmountToMiliUnits(parseFloat(values.initialBalance)) : undefined;
         const creditLimit = values.creditLimit ? convertAmountToMiliUnits(parseFloat(values.creditLimit)) : undefined;
         const interestRate = values.interestRate ? Math.round(parseFloat(values.interestRate) * 100) : undefined; // 5.5% -> 550 basis points
         const dueDate = values.dueDate ? parseInt(values.dueDate) : undefined;
@@ -71,9 +74,11 @@ export const AccountForm = ({
         onSubmit({
             name: values.name,
             type: values.type,
-            creditLimit: creditLimit,
-            dueDate: dueDate,
-            interestRate: interestRate,
+            initialBalance,
+            creditLimit,
+            dueDate,
+            interestRate,
+            currency: values.currency ?? "SGD",
         });
     };
 
@@ -122,6 +127,31 @@ export const AccountForm = ({
                                     onCreate={() => {}} // Not supporting custom types for now to keep it clean
                                     value={field.value}
                                     onChange={field.onChange}
+                                    disabled={disabled}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    name="initialBalance"
+                    control={form.control}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>
+                                Opening Balance
+                            </FormLabel>
+                            <FormControl>
+                                <CurrencyInput
+                                    prefix="$"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="0.00"
+                                    value={field.value}
+                                    decimalsLimit={2}
+                                    decimalScale={2}
+                                    onValueChange={field.onChange}
                                     disabled={disabled}
                                 />
                             </FormControl>

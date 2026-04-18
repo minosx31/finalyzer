@@ -1,4 +1,4 @@
-import { useSheet } from "@/hooks/use-sheet";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { TriangleAlert } from "lucide-react";
 
@@ -8,18 +8,14 @@ type Props = {
     categoryId: string | null;
 };
 
-export const CategoryColumn = ({
-    id,
-    category,
-    categoryId,
-}: Props) => {
-    const { onOpen } = useSheet();
+export const CategoryColumn = ({ id, category, categoryId }: Props) => {
+    const router = useRouter();
 
     const onClick = () => {
         if (categoryId) {
-            onOpen("edit-category", { id: categoryId });
+            router.push(`/manage/categories/${categoryId}`);
         } else {
-            onOpen("edit-transaction", { id });
+            router.push(`/manage/transactions/${id}`);
         }
     };
 
@@ -34,5 +30,5 @@ export const CategoryColumn = ({
             {!category && <TriangleAlert className="mr-2 size-4 shrink-0" />}
             {category || "Uncategorized"}
         </div>
-    )
+    );
 };

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { relations } from "drizzle-orm";
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 export const accounts = pgTable("accounts", {
@@ -8,12 +8,13 @@ export const accounts = pgTable("accounts", {
     name: text("name").notNull(),
     userId: text("user_id").notNull(),
     plaidId: text("plaid_id"),
-    // New fields
-    type: text("type"), // 'bank', 'credit', 'investment', etc.
-    balance: integer("balance").default(0), // Cached balance (optional, or just computed) - actually let's stick to computing it from transactions for now to avoid sync issues, OR if the user wants manual accounts, we might need an initial balance. 
+    type: text("type"), // 'bank', 'savings', 'credit', 'investment', 'loan', 'other'
+    // Balance before tracked transactions. Current balance = initialBalance + SUM(transactions.amount)
+    initialBalance: bigint("initial_balance", { mode: "number" }).default(0), // milliunits
     creditLimit: integer("credit_limit"), // in milliunits
     dueDate: integer("due_date"), // Day of month 1-31
     interestRate: integer("interest_rate"), // in basis points (1/100th of a percent)
+    currency: text("currency").notNull().default("SGD"),
 });
 
 export const accountsRelation = relations(accounts, ({ many }) => ({
@@ -40,8 +41,8 @@ export const goals = pgTable("goals", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
-    targetAmount: integer("target_amount").notNull(), // milliunits
-    currentAmount: integer("current_amount").default(0).notNull(), // milliunits
+    targetAmount: bigint("target_amount", { mode: "number" }).notNull(), // milliunits
+    currentAmount: bigint("current_amount", { mode: "number" }).default(0).notNull(), // milliunits
     deadline: timestamp("deadline", { mode: "date" }),
 });
 
@@ -61,6 +62,10 @@ export const transactions = pgTable("transactions", {
     categoryId: text("category_id").references(() => categories.id, {
         onDelete: "set null",
     }),
+    // Links a transaction back to the recurring expense template that generated it
+    recurringExpenseId: text("recurring_expense_id").references(() => recurringExpenses.id, {
+        onDelete: "set null",
+    }),
 });
 
 export const transactionsRelation = relations(transactions, ({ one }) => ({
@@ -71,6 +76,10 @@ export const transactionsRelation = relations(transactions, ({ one }) => ({
     categories: one(categories, {
         fields: [transactions.categoryId],
         references: [categories.id],
+    }),
+    recurringExpense: one(recurringExpenses, {
+        fields: [transactions.recurringExpenseId],
+        references: [recurringExpenses.id],
     }),
 }));
 
@@ -139,7 +148,7 @@ export const emergencyFund = pgTable("emergency_fund", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull().unique(),
     targetMonths: integer("target_months").notNull().default(6),
-    currentAmount: integer("current_amount").notNull().default(0), // milliunits
+    currentAmount: bigint("current_amount", { mode: "number" }).notNull().default(0), // milliunits
 });
 
 export const insertEmergencyFundSchema = createInsertSchema(emergencyFund);
@@ -148,10 +157,10 @@ export const insertEmergencyFundSchema = createInsertSchema(emergencyFund);
 export const cpfAccounts = pgTable("cpf_accounts", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull().unique(),
-    oaBalance: integer("oa_balance").notNull().default(0),  // milliunits
-    saBalance: integer("sa_balance").notNull().default(0),  // milliunits
-    maBalance: integer("ma_balance").notNull().default(0),  // milliunits
-    raBalance: integer("ra_balance").notNull().default(0),  // milliunits (age 55+)
+    oaBalance: bigint("oa_balance", { mode: "number" }).notNull().default(0),  // milliunits
+    saBalance: bigint("sa_balance", { mode: "number" }).notNull().default(0),  // milliunits
+    maBalance: bigint("ma_balance", { mode: "number" }).notNull().default(0),  // milliunits
+    raBalance: bigint("ra_balance", { mode: "number" }).notNull().default(0),  // milliunits (age 55+)
     updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -161,13 +170,13 @@ export const cpfContributions = pgTable("cpf_contributions", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
     month: timestamp("month", { mode: "date" }).notNull(),
-    grossSalary: integer("gross_salary").notNull(),            // milliunits (capped at OW ceiling)
-    employeeContribution: integer("employee_contribution").notNull(), // milliunits
-    employerContribution: integer("employer_contribution").notNull(), // milliunits
-    oaAmount: integer("oa_amount").notNull(),                  // milliunits
-    saAmount: integer("sa_amount").notNull(),                  // milliunits
-    maAmount: integer("ma_amount").notNull(),                  // milliunits
-    raAmount: integer("ra_amount").notNull().default(0),       // milliunits (age 55+)
+    grossSalary: integer("gross_salary").notNull(),                        // milliunits (capped at OW ceiling)
+    employeeContribution: integer("employee_contribution").notNull(),      // milliunits
+    employerContribution: integer("employer_contribution").notNull(),      // milliunits
+    oaAmount: integer("oa_amount").notNull(),                              // milliunits
+    saAmount: integer("sa_amount").notNull(),                              // milliunits
+    maAmount: integer("ma_amount").notNull(),                              // milliunits
+    raAmount: integer("ra_amount").notNull().default(0),                   // milliunits (age 55+)
 });
 
 export const insertCpfContributionSchema = createInsertSchema(cpfContributions, {
@@ -178,9 +187,9 @@ export const insertCpfContributionSchema = createInsertSchema(cpfContributions, 
 export const netWorthSnapshots = pgTable("net_worth_snapshots", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
-    totalAssets: integer("total_assets").notNull(),       // milliunits
-    totalLiabilities: integer("total_liabilities").notNull(), // milliunits
-    netWorth: integer("net_worth").notNull(),             // milliunits (assets - liabilities)
+    totalAssets: bigint("total_assets", { mode: "number" }).notNull(),       // milliunits
+    totalLiabilities: bigint("total_liabilities", { mode: "number" }).notNull(), // milliunits
+    netWorth: bigint("net_worth", { mode: "number" }).notNull(),             // milliunits (assets - liabilities)
     snapshotDate: timestamp("snapshot_date", { mode: "date" }).notNull(),
 });
 
@@ -192,11 +201,13 @@ export const insertNetWorthSnapshotSchema = createInsertSchema(netWorthSnapshots
 export const investments = pgTable("investments", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
+    // Optional link to an accounts row of type "investment" for unified balance tracking
+    accountId: text("account_id").references(() => accounts.id, { onDelete: "set null" }),
     ticker: text("ticker").notNull(),       // e.g. "ES3.SI", "TSLA"
     name: text("name").notNull(),
     type: text("type").notNull(),           // "stock" | "etf" | "reit" | "bond" | "crypto" | "other"
     exchange: text("exchange"),             // "SGX" | "NYSE" | "NASDAQ" etc.
-    shares: integer("shares").notNull(),    // milliunits for fractional share support
+    shares: bigint("shares", { mode: "number" }).notNull(), // milliunits for fractional share support
     avgCostPrice: integer("avg_cost_price").notNull(), // milliunits per share
     currentPrice: integer("current_price").notNull(),  // milliunits per share (manually updated)
     currency: text("currency").notNull().default("SGD"),
@@ -211,6 +222,15 @@ export const dividends = pgTable("dividends", {
     amount: integer("amount").notNull(), // milliunits
     date: timestamp("date", { mode: "date" }).notNull(),
 });
+
+// Defined after dividends so both sides of the relation are in scope
+export const investmentsRelations = relations(investments, ({ one, many }) => ({
+    account: one(accounts, {
+        fields: [investments.accountId],
+        references: [accounts.id],
+    }),
+    dividends: many(dividends),
+}));
 
 export const dividendsRelations = relations(dividends, ({ one }) => ({
     investment: one(investments, {

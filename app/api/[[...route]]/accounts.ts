@@ -22,7 +22,8 @@ const app = new Hono()
                     id: accounts.id,
                     name: accounts.name,
                     type: accounts.type,
-                    balance: accounts.balance,
+                    initialBalance: accounts.initialBalance,
+                    currency: accounts.currency,
                     creditLimit: accounts.creditLimit,
                     dueDate: accounts.dueDate,
                     interestRate: accounts.interestRate,
@@ -55,7 +56,8 @@ const app = new Hono()
                     id: accounts.id,
                     name: accounts.name,
                     type: accounts.type,
-                    balance: accounts.balance,
+                    initialBalance: accounts.initialBalance,
+                    currency: accounts.currency,
                     creditLimit: accounts.creditLimit,
                     dueDate: accounts.dueDate,
                     interestRate: accounts.interestRate,
@@ -80,9 +82,11 @@ const app = new Hono()
         zValidator("json", insertAccountSchema.pick({
             name: true,
             type: true,
+            initialBalance: true,
             creditLimit: true,
             dueDate: true,
             interestRate: true,
+            currency: true,
         })),
         async (c) => {
             const auth = getAuth(c);
