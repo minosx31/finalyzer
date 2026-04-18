@@ -6,6 +6,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { and, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
+import { processRecurringExpenses } from "@/lib/process-recurring";
 
 const app = new Hono()
     .get(
@@ -78,6 +79,7 @@ const app = new Hono()
             amount: true,
             frequency: true,
             startDate: true,
+            accountId: true,
             categoryId: true,
         })),
         async (c) => {
@@ -185,6 +187,17 @@ const app = new Hono()
             }
 
             return c.json({ data });
+        }
+    )
+    .post(
+        "/process",
+        clerkMiddleware(),
+        async (c) => {
+            const auth = getAuth(c);
+            if (!auth?.userId) return c.json({ error: "Unauthorized" }, 401);
+
+            const count = await processRecurringExpenses(auth.userId);
+            return c.json({ generated: count });
         }
     );
 

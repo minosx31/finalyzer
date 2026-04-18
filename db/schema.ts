@@ -9,7 +9,7 @@ export const accounts = pgTable("accounts", {
     userId: text("user_id").notNull(),
     plaidId: text("plaid_id"),
     type: text("type"), // 'bank', 'savings', 'credit', 'investment', 'loan', 'other'
-    // Balance before tracked transactions. Current balance = initialBalance + SUM(transactions.amount)
+    // Balance before tracked transactions. Current balance = initialBalance + SUM(income) - SUM(expense)
     initialBalance: bigint("initial_balance", { mode: "number" }).default(0), // milliunits
     creditLimit: integer("credit_limit"), // in milliunits
     dueDate: integer("due_date"), // Day of month 1-31
@@ -18,7 +18,8 @@ export const accounts = pgTable("accounts", {
 });
 
 export const accountsRelation = relations(accounts, ({ many }) => ({
-    transactions: many(transactions),
+    transactions: many(transactions, { relationName: "fromAccount" }),
+    incomingTransfers: many(transactions, { relationName: "toAccount" }),
 }));
 
 export const insertAccountSchema = createInsertSchema(accounts);
@@ -28,6 +29,7 @@ export const categories = pgTable("categories", {
     name: text("name").notNull(),
     userId: text("user_id").notNull(),
     plaidId: text("plaid_id"),
+    type: text("type").notNull().default("both"), // 'income' | 'expense' | 'both'
 });
 
 export const categoriesRelation = relations(categories, ({ many }) => ({
@@ -52,28 +54,38 @@ export const insertGoalSchema = createInsertSchema(goals, {
 
 export const transactions = pgTable("transactions", {
     id: text("id").primaryKey(),
-    amount: integer("amount").notNull(),
-    payee: text("payee").notNull(),
+    type: text("type").notNull().default("expense"), // 'income' | 'expense' | 'transfer'
+    amount: integer("amount").notNull(), // milliunits, always positive
+    description: text("description"), // optional freeform, replaces payee
     notes: text("notes"),
     date: timestamp("date", { mode: "date" }).notNull(),
     accountId: text("account_id").references(() => accounts.id, {
         onDelete: "cascade",
     }).notNull(),
+    toAccountId: text("to_account_id").references(() => accounts.id, {
+        onDelete: "set null",
+    }), // transfer only
+    transferFee: integer("transfer_fee"), // milliunits, transfer only
     categoryId: text("category_id").references(() => categories.id, {
         onDelete: "set null",
     }),
-    // Links a transaction back to the recurring expense template that generated it
     recurringExpenseId: text("recurring_expense_id").references(() => recurringExpenses.id, {
         onDelete: "set null",
     }),
 });
 
 export const transactionsRelation = relations(transactions, ({ one }) => ({
-    accounts: one(accounts, {
+    account: one(accounts, {
         fields: [transactions.accountId],
         references: [accounts.id],
+        relationName: "fromAccount",
     }),
-    categories: one(categories, {
+    toAccount: one(accounts, {
+        fields: [transactions.toAccountId],
+        references: [accounts.id],
+        relationName: "toAccount",
+    }),
+    category: one(categories, {
         fields: [transactions.categoryId],
         references: [categories.id],
     }),
@@ -85,19 +97,26 @@ export const transactionsRelation = relations(transactions, ({ one }) => ({
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
     date: z.coerce.date(),
+    amount: z.number().positive("Amount must be positive"),
 });
 
 export const recurringExpenses = pgTable("recurring_expenses", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
-    amount: integer("amount").notNull(), // milliunits
+    amount: integer("amount").notNull(), // milliunits, always positive
     frequency: text("frequency").notNull(), // weekly, monthly, yearly
     startDate: timestamp("start_date", { mode: "date" }).notNull(),
+    accountId: text("account_id").references(() => accounts.id, { onDelete: "cascade" }).notNull(),
     categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
+    lastGeneratedAt: timestamp("last_generated_at", { mode: "date" }),
 });
 
 export const recurringExpensesRelations = relations(recurringExpenses, ({ one }) => ({
+    account: one(accounts, {
+        fields: [recurringExpenses.accountId],
+        references: [accounts.id],
+    }),
     category: one(categories, {
         fields: [recurringExpenses.categoryId],
         references: [categories.id],

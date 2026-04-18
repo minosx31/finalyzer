@@ -61,16 +61,19 @@ const generateTransactionsForDay = (day: Date) => {
         const category = SEED_CATEGORIES[Math.floor(Math.random() * SEED_CATEGORIES.length)];
         const isExpense = Math.random() > 0.6;
         const amount = generateRandomAmount(category);
-        const formattedAmount = convertAmountToMiliUnits(isExpense ? -amount : amount);
+        const formattedAmount = convertAmountToMiliUnits(amount);
 
         SEED_TRANSACTIONS.push({
             id: `transaction_${format(day, "yyyy-MM-dd")}_${i}`,
             accountId: SEED_ACCOUNTS[0].id,
             categoryId: category.id,
             recurringExpenseId: null,
+            toAccountId: null,
+            transferFee: null,
             date: day,
+            type: isExpense ? "expense" : "income",
             amount: formattedAmount,
-            payee: "Merchant",
+            description: "Merchant",
             notes: `Random Transaction ${SEED_TRANSACTIONS.length + 1}`,
         });
     }

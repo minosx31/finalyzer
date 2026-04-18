@@ -36,6 +36,27 @@
       "when": 1776496667575,
       "tag": "0004_previous_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1745020800000,
+      "tag": "0005_transaction_redesign",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776524273972,
+      "tag": "0006_dear_ezekiel_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1745107200000,
+      "tag": "0007_recurring_auto_generate",
+      "breakpoints": true
     }
   ]
 }
