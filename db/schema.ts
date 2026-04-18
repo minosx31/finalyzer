@@ -104,13 +104,19 @@ export const recurringExpenses = pgTable("recurring_expenses", {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
-    amount: integer("amount").notNull(), // milliunits
+    amount: integer("amount").notNull(), // milliunits, always positive
     frequency: text("frequency").notNull(), // weekly, monthly, yearly
     startDate: timestamp("start_date", { mode: "date" }).notNull(),
+    accountId: text("account_id").references(() => accounts.id, { onDelete: "cascade" }).notNull(),
     categoryId: text("category_id").references(() => categories.id, { onDelete: "set null" }),
+    lastGeneratedAt: timestamp("last_generated_at", { mode: "date" }),
 });
 
 export const recurringExpensesRelations = relations(recurringExpenses, ({ one }) => ({
+    account: one(accounts, {
+        fields: [recurringExpenses.accountId],
+        references: [accounts.id],
+    }),
     category: one(categories, {
         fields: [recurringExpenses.categoryId],
         references: [categories.id],
