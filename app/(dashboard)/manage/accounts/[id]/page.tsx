@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, Pencil, Trash2, CreditCard, Building2, TrendingUp, Wallet, X, Check } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, CreditCard, Building2, TrendingUp, Wallet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,32 +24,22 @@ const ACCOUNT_TYPE_ICONS: Record<string, React.ReactNode> = {
     loan: <CreditCard className="size-5" />,
 };
 
-type Props = {
-    params: Promise<{ id: string }>;
-};
+type Props = { params: { id: string } };
 
 const AccountDetailPage = ({ params }: Props) => {
-    const { id } = use(params);
+    const { id } = params;
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
 
     const { data: account, isLoading } = useGetAccount(id);
     const editAccount = useEditAccount(id);
     const deleteAccount = useDeleteAccount(id);
-    const { data: transactions, isLoading: txLoading } = useGetTransactions({ limit: 10 });
+    const { data: transactions, isLoading: txLoading } = useGetTransactions({ accountId: id, limit: 10 });
 
     const [ConfirmDialog, confirm] = useConfirm(
         "Delete Account",
         "This will permanently delete this account and all its transactions. This cannot be undone.",
     );
-
-    const accountTransactions = transactions?.filter((t) => t.accountId === id) ?? [];
-
-    const handleEdit = (values: Parameters<typeof editAccount.mutate>[0]) => {
-        editAccount.mutate(values, {
-            onSuccess: () => setIsEditing(false),
-        });
-    };
 
     const handleDelete = async () => {
         const ok = await confirm();
@@ -88,10 +78,10 @@ const AccountDetailPage = ({ params }: Props) => {
     const defaultFormValues = {
         name: account.name,
         type: account.type ?? undefined,
-        initialBalance: account.initialBalance ? String(convertAmountFromMiliUnits(account.initialBalance)) : undefined,
-        creditLimit: account.creditLimit ? String(convertAmountFromMiliUnits(account.creditLimit)) : undefined,
-        dueDate: account.dueDate ? String(account.dueDate) : undefined,
-        interestRate: account.interestRate ? String(account.interestRate / 100) : undefined,
+        initialBalance: account.initialBalance != null ? String(convertAmountFromMiliUnits(account.initialBalance)) : undefined,
+        creditLimit: account.creditLimit != null ? String(convertAmountFromMiliUnits(account.creditLimit)) : undefined,
+        dueDate: account.dueDate != null ? String(account.dueDate) : undefined,
+        interestRate: account.interestRate != null ? String(account.interestRate / 100) : undefined,
         currency: account.currency,
     };
 
@@ -106,7 +96,6 @@ const AccountDetailPage = ({ params }: Props) => {
                 </Link>
             </Button>
 
-            {/* Account card */}
             <Card>
                 <CardHeader className="flex-row items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -124,8 +113,7 @@ const AccountDetailPage = ({ params }: Props) => {
                         ) : (
                             <>
                                 <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                                    <Pencil className="size-4 mr-1" />
-                                    Edit
+                                    <Pencil className="size-4 mr-1" />Edit
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -134,8 +122,7 @@ const AccountDetailPage = ({ params }: Props) => {
                                     disabled={deleteAccount.isPending}
                                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                                 >
-                                    <Trash2 className="size-4 mr-1" />
-                                    Delete
+                                    <Trash2 className="size-4 mr-1" />Delete
                                 </Button>
                             </>
                         )}
@@ -146,7 +133,9 @@ const AccountDetailPage = ({ params }: Props) => {
                         <AccountForm
                             id={id}
                             defaultValues={defaultFormValues}
-                            onSubmit={handleEdit}
+                            onSubmit={(values) => editAccount.mutate(values as Parameters<typeof editAccount.mutate>[0], {
+                                onSuccess: () => setIsEditing(false),
+                            })}
                             disabled={editAccount.isPending}
                         />
                     ) : (
@@ -155,19 +144,19 @@ const AccountDetailPage = ({ params }: Props) => {
                                 <span className="text-sm text-muted-foreground">Opening Balance</span>
                                 <span className="font-semibold text-lg">{formatSGD(balance)}</span>
                             </div>
-                            {account.creditLimit && (
+                            {account.creditLimit != null && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-muted-foreground">Credit Limit</span>
                                     <span className="font-medium">{formatSGD(convertAmountFromMiliUnits(account.creditLimit))}</span>
                                 </div>
                             )}
-                            {account.interestRate && (
+                            {account.interestRate != null && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-muted-foreground">Interest Rate</span>
                                     <span className="font-medium">{(account.interestRate / 100).toFixed(2)}%</span>
                                 </div>
                             )}
-                            {account.dueDate && (
+                            {account.dueDate != null && (
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-muted-foreground">Payment Due</span>
                                     <span className="font-medium">Day {account.dueDate} of each month</span>
@@ -182,7 +171,6 @@ const AccountDetailPage = ({ params }: Props) => {
                 </CardContent>
             </Card>
 
-            {/* Recent transactions */}
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">Recent Transactions</CardTitle>
@@ -193,14 +181,14 @@ const AccountDetailPage = ({ params }: Props) => {
                         <div className="space-y-2">
                             {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10" />)}
                         </div>
-                    ) : accountTransactions.length === 0 ? (
+                    ) : !transactions || transactions.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-4">
                             No transactions yet.{" "}
-                            <Link href="/manage/transactions" className="underline">Add one</Link>
+                            <Link href="/manage/transactions/new" className="underline">Add one</Link>
                         </p>
                     ) : (
                         <div className="space-y-1">
-                            {accountTransactions.map((tx, i) => (
+                            {transactions.map((tx, i) => (
                                 <div key={tx.id}>
                                     {i > 0 && <Separator />}
                                     <div className="flex justify-between items-center py-2">
@@ -211,7 +199,7 @@ const AccountDetailPage = ({ params }: Props) => {
                                                 {tx.category && ` · ${tx.category}`}
                                             </p>
                                         </div>
-                                        <span className={`text-sm font-semibold ${tx.amount < 0 ? "text-red-500" : "text-green-600"}`}>
+                                        <span className={`text-sm font-semibold tabular-nums ${tx.amount < 0 ? "text-rose-500" : "text-emerald-600"}`}>
                                             {tx.amount < 0 ? "-" : "+"}{formatSGD(Math.abs(tx.amount))}
                                         </span>
                                     </div>

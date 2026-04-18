@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pencil, Trash2, X } from "lucide-react";
@@ -14,10 +14,10 @@ import { useGetCategories, useCreateCategory } from "@/features/categories/api/i
 import { useConfirm } from "@/hooks/use-confirm";
 import { convertAmountFromMiliUnits, formatSGD } from "@/lib/utils";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: { id: string } };
 
 const RecurringDetailPage = ({ params }: Props) => {
-    const { id } = use(params);
+    const { id } = params;
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const { data: recurring, isLoading } = useGetRecurringExpense(id);

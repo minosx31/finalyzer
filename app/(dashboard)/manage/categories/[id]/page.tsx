@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Pencil, Trash2, X } from "lucide-react";
@@ -11,10 +11,10 @@ import { CategoryForm } from "@/features/categories/components/category-form";
 import { useGetCategory, useEditCategory, useDeleteCategory } from "@/features/categories/api/index";
 import { useConfirm } from "@/hooks/use-confirm";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: { id: string } };
 
 const CategoryDetailPage = ({ params }: Props) => {
-    const { id } = use(params);
+    const { id } = params;
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const { data: category, isLoading } = useGetCategory(id);

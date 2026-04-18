@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -14,10 +14,10 @@ import { useGetGoal, useEditGoal, useDeleteGoal } from "@/features/goals/api/ind
 import { useConfirm } from "@/hooks/use-confirm";
 import { convertAmountFromMiliUnits, formatSGD } from "@/lib/utils";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: { id: string } };
 
 const GoalDetailPage = ({ params }: Props) => {
-    const { id } = use(params);
+    const { id } = params;
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const { data: goal, isLoading } = useGetGoal(id);

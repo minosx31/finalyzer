@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -13,10 +12,10 @@ import { useGetAccounts, useCreateAccount } from "@/features/accounts/api/index"
 import { useGetCategories, useCreateCategory } from "@/features/categories/api/index";
 import { useConfirm } from "@/hooks/use-confirm";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: { id: string } };
 
 const TransactionDetailPage = ({ params }: Props) => {
-    const { id } = use(params);
+    const { id } = params;
     const router = useRouter();
     const { data: transaction, isLoading } = useGetTransaction(id);
     const editTransaction = useEditTransaction(id);
