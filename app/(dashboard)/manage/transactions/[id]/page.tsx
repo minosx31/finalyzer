@@ -51,10 +51,13 @@ const TransactionDetailPage = ({ params }: Props) => {
 
     const defaultValues = {
         date: transaction.date ? new Date(transaction.date) : new Date(),
+        type: (transaction.type ?? "expense") as "income" | "expense" | "transfer",
         accountId: transaction.accountId,
+        toAccountId: transaction.toAccountId ?? null,
         categoryId: transaction.categoryId ?? null,
-        payee: transaction.payee,
+        description: transaction.description ?? null,
         amount: String(transaction.amount),
+        transferFee: transaction.transferFee != null ? String(transaction.transferFee) : null,
         notes: transaction.notes ?? null,
     };
 

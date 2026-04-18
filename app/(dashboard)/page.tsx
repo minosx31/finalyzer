@@ -45,7 +45,8 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: summaryData, isLoading: isSummaryLoading } = useGetSummary();
-  const { data: transactions, isLoading: isTransactionsLoading } = useGetTransactions({ limit: 5 });
+  const { data: txResult, isLoading: isTransactionsLoading } = useGetTransactions({ pageSize: 5 });
+  const transactions = txResult?.data;
   const { data: profile } = useGetProfile();
   const [bannerDismissed, setBannerDismissed] = React.useState(false);
 
@@ -356,26 +357,26 @@ export default function DashboardPage() {
                     <div key={transaction.id} className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className={`p-2 rounded-full ${
-                          transaction.amount > 0 ? "bg-green-100" : "bg-gray-100"
+                          transaction.type === "income" ? "bg-green-100" : "bg-gray-100"
                         }`}>
-                          {transaction.amount > 0 ? (
+                          {transaction.type === "income" ? (
                             <ArrowUpIcon className="h-4 w-4 text-green-500" />
                           ) : (
                             <ArrowDownIcon className="h-4 w-4 text-red-500" />
                           )}
                         </div>
                         <div>
-                          <div className="font-medium">{transaction.payee}</div>
+                          <div className="font-medium">{transaction.description || "—"}</div>
                           <div className="text-xs text-muted-foreground">
                             {format(transaction.date, "MMM dd, yyyy")} • {transaction.category || "Uncategorized"}
                           </div>
                         </div>
                       </div>
                       <div className={`font-medium ${
-                        transaction.amount > 0 ? "text-green-500" : ""
+                        transaction.type === "income" ? "text-green-500" : ""
                       }`}>
-                        {transaction.amount > 0 ? "+" : ""}
-                        {formatCurrency(transaction.amount)}
+                        {transaction.type === "income" ? "+" : transaction.type === "expense" ? "-" : ""}
+                        {formatCurrency(Math.abs(transaction.amount))}
                       </div>
                     </div>
                   ))}

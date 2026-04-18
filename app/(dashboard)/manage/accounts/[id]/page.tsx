@@ -34,7 +34,8 @@ const AccountDetailPage = ({ params }: Props) => {
     const { data: account, isLoading } = useGetAccount(id);
     const editAccount = useEditAccount(id);
     const deleteAccount = useDeleteAccount(id);
-    const { data: transactions, isLoading: txLoading } = useGetTransactions({ accountId: id, limit: 10 });
+    const { data: txResult, isLoading: txLoading } = useGetTransactions({ accountId: id, pageSize: 10 });
+    const transactions = txResult?.data;
 
     const [ConfirmDialog, confirm] = useConfirm(
         "Delete Account",
@@ -193,14 +194,14 @@ const AccountDetailPage = ({ params }: Props) => {
                                     {i > 0 && <Separator />}
                                     <div className="flex justify-between items-center py-2">
                                         <div>
-                                            <p className="text-sm font-medium">{tx.payee}</p>
+                                            <p className="text-sm font-medium">{tx.description || "—"}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 {format(new Date(tx.date), "MMM d, yyyy")}
                                                 {tx.category && ` · ${tx.category}`}
                                             </p>
                                         </div>
-                                        <span className={`text-sm font-semibold tabular-nums ${tx.amount < 0 ? "text-rose-500" : "text-emerald-600"}`}>
-                                            {tx.amount < 0 ? "-" : "+"}{formatSGD(Math.abs(tx.amount))}
+                                        <span className={`text-sm font-semibold tabular-nums ${tx.type === "expense" ? "text-rose-500" : "text-emerald-600"}`}>
+                                            {tx.type === "expense" ? "-" : "+"}{formatSGD(Math.abs(tx.amount))}
                                         </span>
                                     </div>
                                 </div>
