@@ -30,6 +30,10 @@ const routes = [
             {
                 href: "/tools/interest-calculator",
                 label: "Interest Calculator"
+            },
+            {
+                href: "/tools/savings-goal",
+                label: "Savings Goal"
             }
         ]
     },
