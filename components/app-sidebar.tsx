@@ -112,6 +112,7 @@ const navItems = [
     title: "Tools",
     items: [
       { title: "Interest Calculator", url: "/tools/interest-calculator",  icon: Calculator },
+      { title: "Savings Goal", url: "/tools/savings-goal",  icon: Calculator },
     ],
   },
 ]
